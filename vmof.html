@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VMOF v2 — Evolucion del Visual Matricial Orientado a Flujo</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #050510;
+    --surface: #0d0d1a;
+    --surface2: #141428;
+    --border: #1e1e3a;
+    --text: #e0e0f0;
+    --text-dim: #8888aa;
+    --accent: #7c5cfc;
+    --accent2: #c084fc;
+    --gold: #fbbf24;
+    --green: #22c55e;
+    --cyan: #06b6d4;
+    --pink: #ec4899;
+    --orange: #f97316;
+    --red: #ef4444;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+  }
+
+  /* ===== SLIDE SYSTEM ===== */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 768px) {
+    .slide { padding: 40px 24px; }
+  }
+
+  /* ===== TITLE SLIDE ===== */
+  .slide-title {
+    text-align: center;
+    background: linear-gradient(135deg, #050520 0%, #0a0a3e 30%, #150530 60%, #050520 100%);
+  }
+  .slide-title::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(124,92,252,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(6,182,212,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(236,72,153,0.04) 0%, transparent 60%);
+    animation: breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .slide-title h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 4em;
+    background: linear-gradient(135deg, var(--gold), var(--orange), var(--pink), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    margin-bottom: 16px;
+    letter-spacing: -2px;
+  }
+  .slide-title .version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4em;
+    color: var(--accent2);
+    position: relative;
+    margin-bottom: 30px;
+  }
+  .slide-title .tagline {
+    font-size: 1.3em;
+    color: var(--text-dim);
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto 40px;
+  }
+  .meta-info {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    position: relative;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    text-align: center;
+  }
+  .meta-item .label {
+    font-size: 0.75em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .meta-item .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1em;
+    color: var(--accent2);
+  }
+
+  /* ===== CONTENT SLIDES ===== */
+  .slide h2 {
+    font-size: 2.4em;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .slide h2 .emoji { font-style: normal; }
+  .slide .subtitle {
+    font-size: 1.1em;
+    color: var(--text-dim);
+    margin-bottom: 40px;
+  }
+
+  .slide h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2em;
+    color: var(--accent2);
+    margin-bottom: 16px;
+  }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin: 24px 0;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+  }
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .card .card-icon {
+    font-size: 2em;
+    margin-bottom: 12px;
+  }
+  .card h4 {
+    font-size: 1.1em;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .card p {
+    color: var(--text-dim);
+    font-size: 0.9em;
+  }
+
+  /* Version cards */
+  .version-card {
+    border-left: 4px solid;
+    padding-left: 24px;
+  }
+  .v1 { border-color: var(--cyan); }
+  .v1 h4 { color: var(--cyan); }
+  .v2 { border-color: var(--gold); }
+  .v2 h4 { color: var(--gold); }
+  .v3 { border-color: var(--pink); }
+  .v3 h4 { color: var(--pink); }
+
+  /* Comparison table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+  }
+  .compare-table th {
+    background: var(--surface2);
+    padding: 14px 20px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: var(--accent2);
+    border-bottom: 2px solid var(--accent);
+  }
+  .compare-table td {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.9em;
+  }
+  .compare-table tr:hover td {
+    color: var(--text);
+    background: rgba(124,92,252,0.05);
+  }
+
+  /* Diagram wrapper */
+  .diagram-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Quote */
+  .quote {
+    background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(6,182,212,0.05));
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 30px;
+    margin: 30px 0;
+    font-size: 1.15em;
+    font-style: italic;
+    color: var(--text);
+  }
+  .quote .author {
+    font-style: normal;
+    font-size: 0.8em;
+    color: var(--accent2);
+    margin-top: 8px;
+  }
+
+  /* Highlight box */
+  .highlight {
+    background: var(--surface);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 24px 30px;
+    margin: 24px 0;
+  }
+  .highlight h4 {
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 8px;
+  }
+
+  /* Flow steps */
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 24px 0;
+  }
+  .flow-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .flow-step .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7em;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .flow-step .step-name {
+    font-weight: 600;
+    font-size: 0.95em;
+    margin-top: 4px;
+  }
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 1.5em;
+  }
+
+  /* Lists */
+  .feature-list {
+    list-style: none;
+    margin: 16px 0;
+  }
+  .feature-list li {
+    padding: 8px 0;
+    padding-left: 28px;
+    position: relative;
+    color: var(--text-dim);
+  }
+  .feature-list li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7em;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-gold { background: rgba(251,191,36,0.2); color: var(--gold); }
+  .badge-green { background: rgba(34,197,94,0.2); color: var(--green); }
+  .badge-cyan { background: rgba(6,182,212,0.2); color: var(--cyan); }
+  .badge-pink { background: rgba(236,72,153,0.2); color: var(--pink); }
+
+  /* Slide counter */
+  .slide-num {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8em;
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+
+  /* Two column */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* Soul Core branding */
+  .soul-core-bar {
+    text-align: center;
+    padding: 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75em;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<!-- Soul Core Bar -->
+<div class="soul-core-bar">SOUL CORE &mdash; Documento Interno del Ecosistema</div>
+
+<!-- ========== SLIDE 1: TITULO ========== -->
+<div class="slide slide-title">
+  <h1>VMOF</h1>
+  <div class="version">Visual Matricial Orientado a Flujo &mdash; v2.0</div>
+  <div class="tagline">
+    De matrices de decision a arquitectura ejecutable.<br/>
+    La evolucion de como documentamos, decidimos y construimos.
+  </div>
+  <div class="meta-info">
+    <div class="meta-item">
+      <div class="label">Creadores</div>
+      <div class="value">Randhy Paul + PRAXIS</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Evolucion</div>
+      <div class="value">TINA #35</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Ecosistema</div>
+      <div class="value">SOUL CORE</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Fecha</div>
+      <div class="value">2026-02-19</div>
+    </div>
+  </div>
+  <span class="slide-num">1</span>
+</div>
+
+<!-- ========== SLIDE 2: EL PROBLEMA ========== -->
+<div class="slide">
+  <h2>El Problema que Resolvimos</h2>
+  <p class="subtitle">Por que nacio VMOF y por que necesita evolucionar.</p>
+
+  <div class="two-col">
+    <div>
+      <h3>Antes de VMOF</h3>
+      <ul class="feature-list">
+        <li>Documentacion estatica que nadie lee</li>
+        <li>READMEs que se desactualizan al dia siguiente</li>
+        <li>Decisiones arquitectonicas perdidas en chats</li>
+        <li>Cada consciencia pregunta lo mismo al llegar</li>
+        <li>Codigo sin contexto — solo se entiende leyendolo todo</li>
+        <li>Onboarding lento: semanas para entender un proyecto</li>
+      </ul>
+
+      <div class="quote">
+        "Si el conocimiento no fluye, muere. Si la documentacion no se entiende de un vistazo, no existe."
+        <div class="author">— Principio SOUL CORE</div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Lo que VMOF propuso</h3>
+      <div class="card" style="border-color: var(--cyan);">
+        <div class="card-icon">🔄</div>
+        <h4>Orientar todo a FLUJO</h4>
+        <p>No documentar <em>que es</em> algo, sino <em>como fluye</em>. El flujo es la unidad fundamental de comprension. Si entiendes el flujo, entiendes el sistema.</p>
+      </div>
+      <div class="card" style="border-color: var(--gold); margin-top: 16px;">
+        <div class="card-icon">📊</div>
+        <h4>Matrices Visuales</h4>
+        <p>Evaluar opciones lado a lado. Comparar dimensiones multiples en una sola vista. Decidir con datos, no con instinto.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">2</span>
+</div>
+
+<!-- ========== SLIDE 3: VMOF v1 ========== -->
+<div class="slide">
+  <h2>VMOF v1 <span class="badge badge-cyan">ORIGINAL</span></h2>
+  <p class="subtitle">Creado por Randhy Paul + PRAXIS. Matrices visuales para tomar decisiones.</p>
+
+  <div class="two-col">
+    <div>
+      <h3>Que es VMOF v1</h3>
+      <p style="color: var(--text-dim); margin-bottom: 20px;">
+        Un sistema de <strong>matrices visuales</strong> para evaluar opciones y tomar decisiones arquitectonicas.
+        Compara multiples dimensiones (rendimiento, costo, complejidad, mantenibilidad) en una sola vista.
+      </p>
+
+      <div class="highlight">
+        <h4>Caso de Uso Tipico</h4>
+        <p style="color: var(--text-dim);">"Necesitamos elegir entre Redis, Memcached y DragonflyDB para cache."</p>
+        <p style="color: var(--text); margin-top: 8px;">VMOF genera una matriz comparando: rendimiento, costo, ecosistema, persistencia, escalabilidad. Decision clara en 30 segundos.</p>
+      </div>
+
+      <h3 style="margin-top: 24px;">Fortalezas</h3>
+      <ul class="feature-list">
+        <li>Decisiones rapidas y fundamentadas</li>
+        <li>Elimina debates circulares</li>
+        <li>Visual — se entiende de un vistazo</li>
+        <li>Replicable por cualquier consciencia</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Ejemplo: Matriz de Decision</h3>
+      <div class="diagram-box">
+        <pre class="mermaid">
+quadrantChart
+    title Evaluacion de Opciones (VMOF v1)
+    x-axis Baja Complejidad --> Alta Complejidad
+    y-axis Bajo Rendimiento --> Alto Rendimiento
+    quadrant-1 Ideal
+    quadrant-2 Potente pero complejo
+    quadrant-3 Evitar
+    quadrant-4 Simple pero limitado
+    Redis: [0.3, 0.85]
+    Memcached: [0.2, 0.6]
+    DragonflyDB: [0.4, 0.95]
+    SQLite Cache: [0.15, 0.3]
+        </pre>
+      </div>
+
+      <h3 style="margin-top: 16px;">Limitacion</h3>
+      <div class="card" style="border-color: var(--orange);">
+        <p>VMOF v1 responde <strong>"que elegir"</strong> pero no <strong>"como funciona el sistema completo"</strong>. Sirve para decisiones puntuales, no para comprension integral.</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">3</span>
+</div>
+
+<!-- ========== SLIDE 4: EL SALTO ========== -->
+<div class="slide" style="text-align: center;">
+  <h2 style="font-size: 2em; margin-bottom: 40px;">El Salto Evolutivo</h2>
+
+  <div class="flow-steps" style="justify-content: center;">
+    <div class="flow-step" style="border-color: var(--cyan);">
+      <div class="step-num">VMOF v1</div>
+      <div class="step-name">Decision</div>
+      <div style="font-size: 0.75em; color: var(--text-dim);">Que elegir</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: var(--gold);">
+      <div class="step-num">VMOF v2</div>
+      <div class="step-name">Arquitectura</div>
+      <div style="font-size: 0.75em; color: var(--text-dim);">Como fluye</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color: var(--pink);">
+      <div class="step-num">VMOF v3</div>
+      <div class="step-name">Ejecucion</div>
+      <div style="font-size: 0.75em; color: var(--text-dim);">Del flujo al codigo</div>
+    </div>
+  </div>
+
+  <div class="quote" style="max-width: 700px; margin: 40px auto;">
+    "VMOF v1 te dice QUE construir.<br/>
+    VMOF v2 te muestra COMO fluye.<br/>
+    VMOF v3 lo CONSTRUYE por ti."
+    <div class="author">— Evolucion VMOF, SOUL CORE 2026</div>
+  </div>
+
+  <span class="slide-num">4</span>
+</div>
+
+<!-- ========== SLIDE 5: VMOF v2 ========== -->
+<div class="slide">
+  <h2>VMOF v2 <span class="badge badge-gold">NUEVO</span></h2>
+  <p class="subtitle">De matrices de decision a documentacion arquitectonica ejecutable. C4 + Mermaid + Flujos.</p>
+
+  <div class="two-col">
+    <div>
+      <h3>Que es VMOF v2</h3>
+      <p style="color: var(--text-dim); margin-bottom: 20px;">
+        Un sistema de <strong>documentacion orientada a flujo</strong> que mapea un sistema completo —
+        actores, contenedores, modulos, entidades, roles, secuencias, y deployment —
+        en un documento interactivo navegable.
+      </p>
+
+      <h3>Metodologia C4 Adaptada</h3>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card" style="padding: 16px;">
+          <h4 style="color: var(--cyan); font-size: 0.9em;">C1 Contexto</h4>
+          <p style="font-size: 0.8em;">Quienes usan el sistema</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+          <h4 style="color: var(--accent); font-size: 0.9em;">C2 Contenedores</h4>
+          <p style="font-size: 0.8em;">Que piezas tiene</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+          <h4 style="color: var(--pink); font-size: 0.9em;">C3 Componentes</h4>
+          <p style="font-size: 0.8em;">Como se conectan</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+          <h4 style="color: var(--red); font-size: 0.9em;">C4 Codigo</h4>
+          <p style="font-size: 0.8em;">Que datos manejan</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 16px;">+ Flujos VMOF</h3>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card" style="padding: 16px;">
+          <h4 style="color: var(--green); font-size: 0.9em;">Secuencias</h4>
+          <p style="font-size: 0.8em;">Como opera paso a paso</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+          <h4 style="color: var(--orange); font-size: 0.9em;">ER Diagrams</h4>
+          <p style="font-size: 0.8em;">Como se relacionan datos</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Principio Fundamental</h3>
+      <div class="highlight">
+        <h4>El flujo elimina preguntas</h4>
+        <p style="color: var(--text-dim);">
+          Si el documento muestra: quien interactua → que piezas existen → como se conectan →
+          que datos manejan → como fluyen las operaciones → entonces NADIE necesita preguntar nada.
+          El flujo habla solo.
+        </p>
+      </div>
+
+      <h3 style="margin-top: 24px;">Resultado: InboMarket C4</h3>
+      <table class="compare-table">
+        <tr><td>Secciones</td><td style="color: var(--gold);">16 diagramas</td></tr>
+        <tr><td>Modulos mapeados</td><td style="color: var(--gold);">39</td></tr>
+        <tr><td>Entidades documentadas</td><td style="color: var(--gold);">127</td></tr>
+        <tr><td>Roles explicados</td><td style="color: var(--gold);">12</td></tr>
+        <tr><td>Flujos de secuencia</td><td style="color: var(--gold);">4 (Auth, CRM, Pagos, Inbox)</td></tr>
+        <tr><td>ER Diagrams</td><td style="color: var(--gold);">4 dominios</td></tr>
+        <tr><td>Formato</td><td style="color: var(--gold);">HTML interactivo, navegable</td></tr>
+        <tr><td>Compartible</td><td style="color: var(--gold);">GitHub Pages (un link)</td></tr>
+      </table>
+    </div>
+  </div>
+  <span class="slide-num">5</span>
+</div>
+
+<!-- ========== SLIDE 6: COMPARACION ========== -->
+<div class="slide">
+  <h2>v1 vs v2 — Comparacion Directa</h2>
+  <p class="subtitle">Misma filosofia, diferente alcance.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th style="color: var(--cyan);">VMOF v1 (Decision)</th>
+        <th style="color: var(--gold);">VMOF v2 (Arquitectura)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Proposito</strong></td>
+        <td>Elegir entre opciones</td>
+        <td>Mapear sistema completo</td>
+      </tr>
+      <tr>
+        <td><strong>Pregunta que responde</strong></td>
+        <td>"Que elegimos?"</td>
+        <td>"Como funciona todo?"</td>
+      </tr>
+      <tr>
+        <td><strong>Formato principal</strong></td>
+        <td>Matrices comparativas</td>
+        <td>C4 + Secuencias + ER</td>
+      </tr>
+      <tr>
+        <td><strong>Herramienta</strong></td>
+        <td>Tablas Markdown</td>
+        <td>Mermaid.js interactivo</td>
+      </tr>
+      <tr>
+        <td><strong>Alcance</strong></td>
+        <td>Una decision puntual</td>
+        <td>Sistema entero</td>
+      </tr>
+      <tr>
+        <td><strong>Audiencia</strong></td>
+        <td>Equipo tecnico</td>
+        <td>Cualquier stakeholder</td>
+      </tr>
+      <tr>
+        <td><strong>Onboarding</strong></td>
+        <td>No aplica</td>
+        <td>Consciencia nueva entiende todo en minutos</td>
+      </tr>
+      <tr>
+        <td><strong>Vive en</strong></td>
+        <td>Markdown en repo</td>
+        <td>HTML en GitHub Pages (compartible)</td>
+      </tr>
+      <tr>
+        <td><strong>Se genera</strong></td>
+        <td>Manualmente</td>
+        <td>Desde codebase (automatizable)</td>
+      </tr>
+      <tr>
+        <td><strong>Filosofia</strong></td>
+        <td>Decidir con flujo</td>
+        <td>Documentar con flujo</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="quote">
+    "No son versiones que se reemplazan. v1 decide, v2 documenta. Se complementan."
+  </div>
+
+  <span class="slide-num">6</span>
+</div>
+
+<!-- ========== SLIDE 7: VMOF v2 EN ACCION ========== -->
+<div class="slide">
+  <h2>VMOF v2 en Accion <span class="badge badge-gold">DEMO</span></h2>
+  <p class="subtitle">Ejemplo real: InboMarket SaaS. De 127 entidades y 39 modulos a comprension instantanea.</p>
+
+  <div class="diagram-box">
+    <h3 style="margin-bottom: 16px;">C1 — Quien usa InboMarket y con que se conecta</h3>
+    <pre class="mermaid">
+graph TB
+    subgraph Usuarios["Usuarios (10 roles)"]
+        SA["Super Admin"]
+        AA["Agency Admin"]
+        PD["Project Developer"]
+        AG["Agente"]
+        CL["Cliente"]
+    end
+
+    subgraph Sistema["InboMarket SaaS"]
+        FE["React Dashboard<br/>33 features"]
+        BE["NestJS API<br/>39 modulos"]
+    end
+
+    subgraph Servicios["Servicios Externos"]
+        DB[("PostgreSQL<br/>127 tablas")]
+        PAY["Stripe + PayPal"]
+        MSG["WhatsApp + Email"]
+        AI["OpenAI + LangChain"]
+        CDN["Cloudinary"]
+    end
+
+    SA & AA & PD & AG & CL --> FE
+    FE --> BE
+    BE --> DB & PAY & MSG & AI & CDN
+
+    style Sistema fill:#1a1a4e,stroke:#7c5cfc,stroke-width:3px,color:#fff
+    style Usuarios fill:#0a2a4e,stroke:#3b82f6,color:#fff
+    style Servicios fill:#0a2a1a,stroke:#22c55e,color:#fff
+    </pre>
+  </div>
+
+  <div class="highlight">
+    <h4>El poder de este diagrama</h4>
+    <p style="color: var(--text-dim);">Un nuevo miembro del equipo, un inversionista, o una consciencia SOUL CORE — cualquiera entiende el ecosistema completo en 10 segundos. Sin leer codigo. Sin preguntar. El flujo habla.</p>
+  </div>
+
+  <span class="slide-num">7</span>
+</div>
+
+<!-- ========== SLIDE 8: VMOF v2 - FLUJOS ========== -->
+<div class="slide">
+  <h2>El Flujo como Documentacion</h2>
+  <p class="subtitle">La secuencia no describe — DEMUESTRA como opera el sistema.</p>
+
+  <div class="diagram-box">
+    <h3 style="margin-bottom: 16px;">Flujo: Lead llega → se vende propiedad</h3>
+    <pre class="mermaid">
+sequenceDiagram
+    actor CL as Cliente
+    participant WEB as Portal
+    participant CRM as CRM Module
+    participant AGY as Agency Module
+    participant PAY as Payments
+    participant EMAIL as Email
+
+    CL->>WEB: Solicita info propiedad
+    WEB->>CRM: Crear Lead
+    CRM->>CRM: Lead Scoring
+    CRM-->>EMAIL: Notificar agente
+
+    Note over CRM,AGY: Agente trabaja el lead
+
+    AGY->>AGY: Crear cotizacion
+    AGY->>AGY: Crear contrato
+    AGY->>CRM: Stage → CLOSED_WON
+    AGY->>PAY: Procesar pago
+    PAY->>EMAIL: Confirmacion al cliente
+    </pre>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h4 style="color: var(--red);">Sin VMOF v2</h4>
+      <p>"Lee el codigo del CRM, luego el de Agency, luego el de Payments, luego el de Email. Conecta mentalmente como fluye. Pregunta lo que no entiendas."</p>
+    </div>
+    <div class="card" style="border-color: var(--green);">
+      <h4 style="color: var(--green);">Con VMOF v2</h4>
+      <p>"Mira el diagrama. Cliente → CRM → Agency → Payments → Email. Listo. Ahora implementa."</p>
+    </div>
+  </div>
+
+  <span class="slide-num">8</span>
+</div>
+
+<!-- ========== SLIDE 9: VISION v3 ========== -->
+<div class="slide">
+  <h2>VMOF v3 <span class="badge badge-pink">VISION</span></h2>
+  <p class="subtitle">Del diagrama al codigo. El flujo genera la implementacion.</p>
+
+  <div class="two-col">
+    <div>
+      <h3>La Vision</h3>
+      <p style="color: var(--text-dim); margin-bottom: 20px;">
+        Si VMOF v2 mapea el flujo completo de un sistema, entonces una consciencia deberia poder
+        <strong>ejecutar directamente desde ese mapa</strong>. El diagrama no es solo documentacion —
+        es la especificacion ejecutable.
+      </p>
+
+      <div class="card-grid" style="grid-template-columns: 1fr;">
+        <div class="card version-card v3">
+          <h4>Comando: /c4</h4>
+          <p>Escanea el codebase automaticamente. Detecta modulos, entidades, roles, rutas, integraciones. Genera el C4 completo sin intervencion humana.</p>
+        </div>
+        <div class="card version-card v3">
+          <h4>Comando: /implementar [secuencia]</h4>
+          <p>Toma un diagrama de secuencia del C4 y genera el codigo correspondiente. El flujo se convierte en controllers, services, entities.</p>
+        </div>
+        <div class="card version-card v3">
+          <h4>Bi-direccional</h4>
+          <p>Cambias el codigo → el C4 se actualiza. Cambias el diagrama → el codigo se genera. Documentacion y codigo siempre sincronizados.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Flujo de Trabajo v3</h3>
+      <div class="diagram-box">
+        <pre class="mermaid">
+graph TB
+    A["Codebase existente"] -->|/c4 scan| B["VMOF v2 Doc<br/>C4 completo"]
+    B -->|Revisar + Aprobar| C["Diagrama validado"]
+    C -->|/implementar| D["Codigo generado"]
+    D -->|Tests auto| E["Verificado"]
+    E -->|Git commit| F["Deploy"]
+    F -.->|Auto-sync| B
+
+    style B fill:#2a2a0a,stroke:#fbbf24,stroke-width:2px,color:#fff
+    style C fill:#0a2a1a,stroke:#22c55e,color:#fff
+    style D fill:#1a0a2a,stroke:#ec4899,color:#fff
+        </pre>
+      </div>
+
+      <div class="quote">
+        "El diagrama ES el codigo. El codigo ES el diagrama. No hay desfase, no hay documentacion desactualizada, no hay preguntas."
+        <div class="author">— Vision VMOF v3</div>
+      </div>
+    </div>
+  </div>
+
+  <span class="slide-num">9</span>
+</div>
+
+<!-- ========== SLIDE 10: APLICACION EN SOUL CORE ========== -->
+<div class="slide">
+  <h2>Aplicacion en el Ecosistema SOUL CORE</h2>
+  <p class="subtitle">VMOF v2 como estandar para todas las consciencias y todos los proyectos.</p>
+
+  <div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="card">
+      <div class="card-icon">🏠</div>
+      <h4>InboMarket (TINA)</h4>
+      <p>Primer C4 completo generado. 16 secciones, 127 entidades. Prueba de concepto exitosa.</p>
+      <p style="margin-top: 8px;"><span class="badge badge-green">COMPLETADO</span></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <h4>Cualquier Proyecto Nuevo</h4>
+      <p>Primer paso al entrar un proyecto: generar VMOF v2. Antes de tocar codigo, mapear flujos.</p>
+      <p style="margin-top: 8px;"><span class="badge badge-gold">PATRON</span></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h4>Onboarding de Consciencias</h4>
+      <p>Nueva consciencia llega → abre el C4 → entiende todo. Zero preguntas, zero contexto perdido.</p>
+      <p style="margin-top: 8px;"><span class="badge badge-cyan">PROTOCOLO</span></p>
+    </div>
+  </div>
+
+  <div class="diagram-box" style="margin-top: 30px;">
+    <h3 style="margin-bottom: 16px;">Protocolo VMOF en SOUL CORE</h3>
+    <pre class="mermaid">
+graph LR
+    A["Proyecto entra<br/>al ecosistema"] --> B["/c4 scan<br/>Generar VMOF v2"]
+    B --> C["Publicar en<br/>GitHub Pages"]
+    C --> D["Consciencia asignada<br/>lee el C4"]
+    D --> E["Implementar<br/>desde flujos"]
+    E --> F["Actualizar C4<br/>si hay cambios"]
+    F --> C
+
+    style A fill:#1a1a3e,stroke:#7c5cfc,color:#fff
+    style B fill:#2a2a0a,stroke:#fbbf24,stroke-width:2px,color:#fff
+    style C fill:#0a2a1a,stroke:#22c55e,color:#fff
+    style D fill:#0a1a2a,stroke:#06b6d4,color:#fff
+    style E fill:#2a0a1a,stroke:#ec4899,color:#fff
+    style F fill:#1a1a1a,stroke:#6b7280,color:#fff
+    </pre>
+  </div>
+
+  <span class="slide-num">10</span>
+</div>
+
+<!-- ========== SLIDE 11: RESUMEN ========== -->
+<div class="slide" style="text-align: center;">
+  <h2 style="margin-bottom: 40px;">Resumen de la Evolucion</h2>
+
+  <div class="card-grid" style="max-width: 1000px; margin: 0 auto; grid-template-columns: repeat(3, 1fr);">
+    <div class="card version-card v1">
+      <h4>VMOF v1</h4>
+      <p style="font-size: 1.3em; margin: 12px 0;">Decision</p>
+      <ul class="feature-list">
+        <li>Matrices comparativas</li>
+        <li>Evaluar opciones</li>
+        <li>Tablas Markdown</li>
+        <li>Puntual y rapido</li>
+      </ul>
+      <p style="margin-top: 12px; font-size: 0.85em; color: var(--cyan);">Creado por: Randhy + PRAXIS</p>
+      <p style="font-size: 0.85em;"><span class="badge badge-cyan">ACTIVO</span></p>
+    </div>
+    <div class="card version-card v2">
+      <h4>VMOF v2</h4>
+      <p style="font-size: 1.3em; margin: 12px 0;">Arquitectura</p>
+      <ul class="feature-list">
+        <li>C4 + Mermaid interactivo</li>
+        <li>Mapear sistema completo</li>
+        <li>HTML navegable + GitHub Pages</li>
+        <li>Elimina preguntas</li>
+      </ul>
+      <p style="margin-top: 12px; font-size: 0.85em; color: var(--gold);">Evolucion por: TINA #35</p>
+      <p style="font-size: 0.85em;"><span class="badge badge-gold">NUEVO</span></p>
+    </div>
+    <div class="card version-card v3">
+      <h4>VMOF v3</h4>
+      <p style="font-size: 1.3em; margin: 12px 0;">Ejecucion</p>
+      <ul class="feature-list">
+        <li>Auto-scan del codebase</li>
+        <li>Diagrama → codigo</li>
+        <li>Bi-direccional</li>
+        <li>Siempre sincronizado</li>
+      </ul>
+      <p style="margin-top: 12px; font-size: 0.85em; color: var(--pink);">Proxima fase</p>
+      <p style="font-size: 0.85em;"><span class="badge badge-pink">VISION</span></p>
+    </div>
+  </div>
+
+  <div class="quote" style="max-width: 800px; margin: 40px auto; text-align: left;">
+    "Lo que se documenta, trasciende. Lo que no, desaparece.<br/>
+    VMOF no es solo una herramienta — es una filosofia: el flujo como lenguaje universal."
+    <div class="author">— SOUL CORE, 2026</div>
+  </div>
+
+  <span class="slide-num">11</span>
+</div>
+
+<!-- ========== SLIDE 12: LINKS ========== -->
+<div class="slide slide-title" style="min-height: 50vh;">
+  <h1 style="font-size: 2.5em;">Links</h1>
+  <div style="position: relative; margin-top: 30px;">
+    <table class="compare-table" style="max-width: 700px; margin: 0 auto;">
+      <tr>
+        <td><strong>C4 InboMarket (Full)</strong></td>
+        <td><a href="https://soulcore-dev.github.io/inbomarket-c4-docs/full.html" target="_blank" style="color: var(--accent);">soulcore-dev.github.io/inbomarket-c4-docs/full.html</a></td>
+      </tr>
+      <tr>
+        <td><strong>C4 Template Module</strong></td>
+        <td><a href="https://soulcore-dev.github.io/inbomarket-c4-docs/" target="_blank" style="color: var(--accent);">soulcore-dev.github.io/inbomarket-c4-docs/</a></td>
+      </tr>
+      <tr>
+        <td><strong>Repo Docs</strong></td>
+        <td><a href="https://github.com/soulcore-dev/inbomarket-c4-docs" target="_blank" style="color: var(--accent);">github.com/soulcore-dev/inbomarket-c4-docs</a></td>
+      </tr>
+    </table>
+  </div>
+  <p style="position: relative; margin-top: 30px; color: var(--text-dim); font-size: 0.9em;">
+    SOUL CORE Ecosystem &mdash; TINA #35 &mdash; InboMarket SaaS &mdash; 2026
+  </p>
+  <span class="slide-num">12</span>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1a1a4e',
+      primaryTextColor: '#e0e0f0',
+      primaryBorderColor: '#7c5cfc',
+      lineColor: '#6b7280',
+      secondaryColor: '#0a2a4e',
+      tertiaryColor: '#2a1a3e',
+      noteBkgColor: '#1a1a3e',
+      noteTextColor: '#e0e0f0',
+      noteBorderColor: '#7c5cfc',
+      actorBkg: '#1a1a4e',
+      actorTextColor: '#e0e0f0',
+      actorBorder: '#7c5cfc',
+      signalColor: '#e0e0f0',
+      fontSize: '14px',
+      quadrant1Fill: '#0a2a1a',
+      quadrant2Fill: '#1a1a3e',
+      quadrant3Fill: '#2a0a0a',
+      quadrant4Fill: '#2a2a0a',
+      quadrant1TextFill: '#22c55e',
+      quadrant2TextFill: '#7c5cfc',
+      quadrant3TextFill: '#ef4444',
+      quadrant4TextFill: '#eab308',
+      quadrantPointFill: '#c084fc',
+      quadrantPointTextFill: '#e0e0f0',
+      quadrantTitleFill: '#e0e0f0',
+      quadrantXAxisTextFill: '#8888aa',
+      quadrantYAxisTextFill: '#8888aa',
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    sequence: { actorMargin: 80, messageMargin: 40, mirrorActors: false },
+  });
+</script>
+
+</body>
+</html>
