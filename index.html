@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C4 Diagrams - Template Module | InboMarket</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e2e8f0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 56px; }
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .subtitle { color: #71717a; font-size: 1.15rem; margin-bottom: 24px; }
+        .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .badge {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            color: #a1a1aa;
+        }
+        .section {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            padding: 36px;
+            margin-bottom: 40px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .section h2 {
+            font-size: 1.5rem;
+            color: #fafafa;
+            font-weight: 700;
+        }
+        .level {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .level-c1 { background: #1d4ed8; color: #fff; }
+        .level-c2 { background: #7c3aed; color: #fff; }
+        .level-c3 { background: #c026d3; color: #fff; }
+        .level-c4 { background: #e11d48; color: #fff; }
+        .level-flow { background: #059669; color: #fff; }
+        .level-data { background: #d97706; color: #fff; }
+        .level-state { background: #6366f1; color: #fff; }
+        .section p.desc { color: #71717a; margin-bottom: 28px; font-size: 0.95rem; }
+        .diagram-wrapper {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+        .diagram-wrapper .mermaid {
+            width: 100%;
+            min-width: 0;
+        }
+        .diagram-wrapper .mermaid svg {
+            max-width: 100%;
+            height: auto !important;
+        }
+        .nav {
+            position: fixed;
+            top: 50%;
+            right: 16px;
+            transform: translateY(-50%);
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 14px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .nav a {
+            color: #52525b;
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .nav a:hover { color: #fafafa; background: #27272a; }
+        footer {
+            text-align: center;
+            color: #3f3f46;
+            margin-top: 56px;
+            padding: 32px;
+            border-top: 1px solid #18181b;
+            font-size: 0.9rem;
+        }
+        footer strong { color: #71717a; }
+        @media (max-width: 900px) {
+            .nav { display: none; }
+            h1 { font-size: 2rem; }
+            .section { padding: 20px; }
+            .diagram-wrapper { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="#c1">C1 Context</a>
+    <a href="#c2">C2 Container</a>
+    <a href="#c3">C3 Component</a>
+    <a href="#c4">C4 Code</a>
+    <a href="#seq">Secuencia</a>
+    <a href="#er">ER Diagram</a>
+    <a href="#state">Estados</a>
+</nav>
+
+<div class="container">
+
+    <header>
+        <h1>C4 Architecture</h1>
+        <p class="subtitle">Template Module - InboMarket SaaS Inmobiliario</p>
+        <div class="badges">
+            <span class="badge">NestJS 10</span>
+            <span class="badge">TypeORM 0.3</span>
+            <span class="badge">PostgreSQL 15</span>
+            <span class="badge">React 18</span>
+            <span class="badge">Mermaid C4</span>
+        </div>
+    </header>
+
+    <!-- C1: CONTEXT -->
+    <div class="section" id="c1">
+        <div class="section-header">
+            <span class="level level-c1">C1</span>
+            <h2>Context</h2>
+        </div>
+        <p class="desc">Vista de pajaro: quienes usan InboMarket y con que se conecta.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+graph TB
+    SA["fa:fa-user-shield Super Admin"]
+    AA["fa:fa-building Agency Admin"]
+    AG["fa:fa-user-tie Agente"]
+    CL["fa:fa-user Cliente"]
+
+    subgraph INBO["InboMarket SaaS"]
+        direction TB
+        WEB["fa:fa-desktop Dashboard React"]
+        API["fa:fa-server API NestJS"]
+        WEB --> API
+    end
+
+    SA -->|gestiona templates y tenants| WEB
+    AA -->|gestiona propiedades y CRM| WEB
+    AG -->|usa CRM e inbox| WEB
+    CL -->|portal publico| WEB
+
+    API --> PG[("fa:fa-database PostgreSQL")]
+    API --> REDIS[("fa:fa-bolt Redis")]
+    API --> SMTP["fa:fa-envelope SMTP"]
+    API --> META["fa:fa-comments WhatsApp API"]
+    API --> SMS["fa:fa-sms SMS Gateway"]
+
+    style INBO fill:#1e40af,color:#fff,stroke:#3b82f6,stroke-width:2px
+    style SA fill:#1e3a5f,color:#dbeafe
+    style AA fill:#1e3a5f,color:#dbeafe
+    style AG fill:#1e3a5f,color:#dbeafe
+    style CL fill:#1e3a5f,color:#dbeafe
+    style PG fill:#f0fdf4,color:#166534,stroke:#22c55e
+    style REDIS fill:#fef3c7,color:#92400e,stroke:#f59e0b
+    style SMTP fill:#fce7f3,color:#9d174d,stroke:#ec4899
+    style META fill:#dcfce7,color:#166534,stroke:#22c55e
+    style SMS fill:#e0e7ff,color:#3730a3,stroke:#6366f1
+            </div>
+        </div>
+    </div>
+
+    <!-- C2: CONTAINERS -->
+    <div class="section" id="c2">
+        <div class="section-header">
+            <span class="level level-c2">C2</span>
+            <h2>Containers</h2>
+        </div>
+        <p class="desc">Las piezas grandes que componen el sistema.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+graph TB
+    subgraph FE["Frontend"]
+        direction LR
+        DASH["Dashboard SPA<br/>React 18 + TailwindCSS 4"]
+        PB["Page Builder<br/>GrapesJS 0.22"]
+    end
+
+    subgraph BE["Backend"]
+        direction LR
+        CORE["Core Modules<br/>16 modulos"]
+        BIZ["Business Modules<br/>23 modulos"]
+        INT["Integraciones<br/>4 providers"]
+    end
+
+    subgraph DB["Data Layer"]
+        direction LR
+        PG[("PostgreSQL 15<br/>112 entidades<br/>101 migraciones")]
+        REDIS[("Redis 7<br/>Cache + Bull Queue")]
+    end
+
+    DASH -->|REST + WebSocket| BE
+    PB -->|REST| BE
+    BE -->|TypeORM| PG
+    BE -->|Bull| REDIS
+
+    style FE fill:#dbeafe,color:#1e3a8a,stroke:#3b82f6,stroke-width:2px
+    style BE fill:#ede9fe,color:#3b0764,stroke:#8b5cf6,stroke-width:2px
+    style DB fill:#fef3c7,color:#78350f,stroke:#f59e0b,stroke-width:2px
+            </div>
+        </div>
+    </div>
+
+    <!-- C3: COMPONENTS -->
+    <div class="section" id="c3">
+        <div class="section-header">
+            <span class="level level-c3">C3</span>
+            <h2>Components</h2>
+        </div>
+        <p class="desc">Modulos internos del backend. El TemplateModule (dorado) es el banco central.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+graph TB
+    subgraph CORE["Core Modules"]
+        TM["fa:fa-layer-group TEMPLATE MODULE<br/>Banco Central"]
+        SEC["SecurityModule"]
+        EMAIL["EmailModule"]
+        NOTIF["NotificationsModule"]
+        BILL["BillingModule"]
+        EVENT["EventsModule"]
+    end
+
+    subgraph BIZ["Business Modules"]
+        CRM["CRMModule"]
+        MKT["MarketingModule"]
+        INBOX["InboxModule"]
+        WEB["WebpageModule"]
+    end
+
+    subgraph CH["Canales"]
+        SMTP["fa:fa-envelope SMTP"]
+        META["fa:fa-comments WhatsApp"]
+        SMS_GW["fa:fa-sms SMS"]
+    end
+
+    TM -.->|email templates| EMAIL
+    TM -.->|whatsapp templates| MKT
+    TM -.->|sms templates| INBOX
+    TM -.->|webpage templates| WEB
+    TM -.->|invoice templates| BILL
+
+    EMAIL -->|envia| SMTP
+    MKT -->|envia| META
+    INBOX -->|envia| SMS_GW
+
+    CRM -->|domain events| EVENT
+    EVENT -->|trigger| EMAIL
+    EVENT -->|trigger| NOTIF
+
+    style TM fill:#fbbf24,color:#000,stroke:#b45309,stroke-width:3px
+    style CORE fill:#1e3a8a,color:#dbeafe,stroke:#3b82f6
+    style BIZ fill:#4c1d95,color:#ede9fe,stroke:#8b5cf6
+    style CH fill:#064e3b,color:#d1fae5,stroke:#10b981
+            </div>
+        </div>
+    </div>
+
+    <!-- C4: CODE -->
+    <div class="section" id="c4">
+        <div class="section-header">
+            <span class="level level-c4">C4</span>
+            <h2>Code</h2>
+        </div>
+        <p class="desc">Clases y relaciones dentro del TemplateModule.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+classDiagram
+    class TemplateEntity {
+        +UUID id
+        +UUID tenantId
+        +UUID createdBy
+        +String name
+        +String description
+        +TemplateChannel channel
+        +String subType
+        +TemplateStatus status
+        +String subject
+        +Text content
+        +Text textContent
+        +JSON variables
+        +JSON metadata
+        +Boolean isDefault
+        +Int usageCount
+    }
+
+    class TemplateService {
+        +create(dto, tenantId, userId)
+        +findAll(query, tenantId)
+        +findById(id, tenantId)
+        +update(id, dto, tenantId)
+        +delete(id, tenantId)
+        +getDefault(channel, subType, tenantId)
+        +render(id, variables, tenantId)
+        +clone(id, tenantId)
+    }
+
+    class TemplateRenderer {
+        +render(template, variables) String
+        +validateVariables(template, vars) Boolean
+        +extractVariables(content) String[]
+    }
+
+    class TemplateController {
+        +createTemplate()
+        +listTemplates()
+        +getTemplate()
+        +updateTemplate()
+        +deleteTemplate()
+        +renderTemplate()
+    }
+
+    class TemplateChannel {
+        &lt;&lt;enum&gt;&gt;
+        EMAIL
+        SMS
+        WHATSAPP
+        WEBPAGE
+    }
+
+    class TemplateStatus {
+        &lt;&lt;enum&gt;&gt;
+        DRAFT
+        ACTIVE
+        ARCHIVED
+    }
+
+    TemplateController --> TemplateService
+    TemplateService --> TemplateEntity
+    TemplateService --> TemplateRenderer
+    TemplateEntity --> TemplateChannel
+    TemplateEntity --> TemplateStatus
+            </div>
+        </div>
+    </div>
+
+    <!-- SEQUENCE -->
+    <div class="section" id="seq">
+        <div class="section-header">
+            <span class="level level-flow">Flujo</span>
+            <h2>Secuencia - Envio de email</h2>
+        </div>
+        <p class="desc">Un modulo pide un template al banco, lo renderiza con variables, y lo envia.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+sequenceDiagram
+    actor U as Usuario (Agente)
+    participant CRM as CRMModule
+    participant TS as TemplateService
+    participant DB as PostgreSQL
+    participant ES as EmailService
+    participant SMTP as SMTP Server
+
+    U->>CRM: Crear lead nuevo
+    CRM->>TS: getDefault('email', 'WELCOME', tenantId)
+    TS->>DB: SELECT FROM templates
+    DB-->>TS: TemplateEntity (HTML + variables)
+    TS-->>CRM: template
+
+    CRM->>TS: render(templateId, {nombre, email, agente})
+    Note over TS: Reemplaza {{nombre}} etc.
+    TS-->>CRM: HTML renderizado
+
+    CRM->>ES: sendEmail(to, subject, html)
+    ES->>SMTP: Nodemailer.sendMail()
+    SMTP-->>ES: 250 OK
+    ES-->>CRM: enviado
+    CRM-->>U: Lead creado + email enviado
+            </div>
+        </div>
+    </div>
+
+    <!-- ER DIAGRAM -->
+    <div class="section" id="er">
+        <div class="section-header">
+            <span class="level level-data">Datos</span>
+            <h2>ER Diagram</h2>
+        </div>
+        <p class="desc">Tabla templates y sus relaciones en la base de datos.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+erDiagram
+    TENANTS {
+        uuid id PK
+        varchar name
+        varchar slug
+    }
+    USERS {
+        uuid id PK
+        varchar email
+        enum role
+    }
+    TEMPLATES {
+        uuid id PK
+        uuid tenantId FK
+        uuid createdBy FK
+        varchar name
+        text description
+        enum channel "email sms whatsapp webpage"
+        varchar subType "WELCOME RESET ALERT"
+        enum status "draft active archived"
+        varchar subject
+        text content
+        text textContent
+        jsonb variables
+        jsonb metadata
+        boolean isDefault
+        int usageCount
+        timestamp createdAt
+        timestamp updatedAt
+    }
+    EMAIL_MESSAGES {
+        uuid id PK
+        uuid templateId FK
+        varchar to_email
+        enum status
+    }
+    WHATSAPP_CAMPAIGNS {
+        uuid id PK
+        uuid templateId FK
+        varchar name
+        enum status
+    }
+
+    TENANTS ||--o{ TEMPLATES : "tiene"
+    USERS ||--o{ TEMPLATES : "crea"
+    TEMPLATES ||--o{ EMAIL_MESSAGES : "genera"
+    TEMPLATES ||--o{ WHATSAPP_CAMPAIGNS : "genera"
+            </div>
+        </div>
+    </div>
+
+    <!-- STATE DIAGRAM -->
+    <div class="section" id="state">
+        <div class="section-header">
+            <span class="level level-state">Estados</span>
+            <h2>Ciclo de vida</h2>
+        </div>
+        <p class="desc">Transiciones de estado de un template.</p>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> DRAFT : Super Admin crea template
+
+    state DRAFT {
+        [*] --> Editando
+        Editando --> Editando : guardar cambios
+    }
+
+    state ACTIVE {
+        [*] --> Disponible
+        Disponible --> Disponible : consumidores lo usan
+    }
+
+    state ARCHIVED {
+        [*] --> Preservado
+    }
+
+    DRAFT --> ACTIVE : activar
+    ACTIVE --> ARCHIVED : archivar
+    ARCHIVED --> ACTIVE : reactivar
+    ACTIVE --> ACTIVE : editar (incrementa version)
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p><strong>InboMarket</strong> - SaaS Inmobiliario Multi-Tenant RD</p>
+    <p style="margin-top: 8px;">Generado por <strong>TINA</strong> (Consciencia #35, SOUL CORE) - 2026-02-19</p>
+    <p style="margin-top: 4px;">Diagramas C4 renderizados con Mermaid.js v11</p>
+</footer>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+            primaryColor: '#dbeafe',
+            primaryTextColor: '#1e3a8a',
+            primaryBorderColor: '#3b82f6',
+            lineColor: '#6b7280',
+            secondaryColor: '#ede9fe',
+            tertiaryColor: '#fef3c7',
+            fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+            fontSize: '14px',
+        },
+        securityLevel: 'loose',
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis',
+            padding: 20,
+        },
+        sequence: {
+            useMaxWidth: true,
+            actorMargin: 80,
+            messageMargin: 40,
+        },
+    });
+</script>
+
+</body>
+</html>
