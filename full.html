@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C4 Architecture - InboMarket SaaS Inmobiliario</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #050510;
+    --surface: #0d0d1a;
+    --surface2: #141428;
+    --border: #1e1e3a;
+    --text: #e0e0f0;
+    --text-dim: #8888aa;
+    --accent: #7c5cfc;
+    --accent2: #c084fc;
+    --c1: #3b82f6;
+    --c2: #8b5cf6;
+    --c3: #ec4899;
+    --c4: #ef4444;
+    --green: #22c55e;
+    --orange: #f97316;
+    --cyan: #06b6d4;
+    --yellow: #eab308;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a0a3e 50%, #0a1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(124,92,252,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(6,182,212,0.05) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  .hero h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.8em;
+    background: linear-gradient(135deg, var(--accent), var(--cyan), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .hero .subtitle {
+    font-size: 1.1em;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .hero .stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .stat-box .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-box .label {
+    font-size: 0.75em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Tech badges */
+  .tech-badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    position: relative;
+  }
+  .tech-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Layout */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Navigation */
+  nav {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.7em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav a:hover { background: var(--surface2); color: var(--text); }
+  nav a .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  /* Sections */
+  section {
+    padding: 50px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .level-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75em;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: white;
+  }
+  .section-header h2 {
+    font-size: 1.8em;
+    font-weight: 700;
+  }
+  .section-desc {
+    color: var(--text-dim);
+    margin-bottom: 30px;
+    font-size: 0.95em;
+  }
+
+  /* Diagram wrapper */
+  .diagram-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    overflow-x: auto;
+  }
+  .diagram-card h3 {
+    font-size: 1.1em;
+    margin-bottom: 16px;
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .mermaid {
+    display: flex;
+    justify-content: center;
+    min-height: 200px;
+  }
+  .mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Tables */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.85em;
+  }
+  .info-table th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    border-bottom: 2px solid var(--border);
+  }
+  .info-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .info-table tr:hover td { color: var(--text); background: var(--surface2); }
+
+  /* Grid */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    nav { display: none; }
+    .hero h1 { font-size: 1.8em; }
+  }
+
+  /* Role badges */
+  .role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 2px;
+  }
+  .role-admin { background: rgba(239,68,68,0.2); color: #f87171; }
+  .role-business { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .role-support { background: rgba(34,197,94,0.2); color: #4ade80; }
+  .role-client { background: rgba(234,179,8,0.2); color: #facc15; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 0.85em;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>InboMarket</h1>
+  <div class="subtitle">SaaS Gestion Inmobiliaria Multi-Tenant — Republica Dominicana</div>
+  <div class="stats">
+    <div class="stat-box"><div class="num">39</div><div class="label">Modulos</div></div>
+    <div class="stat-box"><div class="num">127</div><div class="label">Entidades</div></div>
+    <div class="stat-box"><div class="num">12</div><div class="label">Roles</div></div>
+    <div class="stat-box"><div class="num">33</div><div class="label">Features UI</div></div>
+    <div class="stat-box"><div class="num">101+</div><div class="label">Migraciones</div></div>
+    <div class="stat-box"><div class="num">9</div><div class="label">Integraciones</div></div>
+  </div>
+  <div class="tech-badges">
+    <span class="tech-badge">NestJS 10</span>
+    <span class="tech-badge">React 18</span>
+    <span class="tech-badge">TypeORM 0.3</span>
+    <span class="tech-badge">PostgreSQL 15</span>
+    <span class="tech-badge">Redis 7</span>
+    <span class="tech-badge">Socket.io</span>
+    <span class="tech-badge">Vite 5</span>
+    <span class="tech-badge">TailwindCSS 4</span>
+    <span class="tech-badge">Redux Toolkit</span>
+    <span class="tech-badge">GrapesJS</span>
+    <span class="tech-badge">LangChain</span>
+    <span class="tech-badge">Stripe</span>
+    <span class="tech-badge">Meta WhatsApp</span>
+  </div>
+</div>
+
+<!-- Navigation -->
+<nav>
+  <a href="#c1"><span class="dot" style="background:var(--c1)"></span>C1 Contexto</a>
+  <a href="#c2"><span class="dot" style="background:var(--c2)"></span>C2 Contenedores</a>
+  <a href="#c3-backend"><span class="dot" style="background:var(--c3)"></span>C3 Backend</a>
+  <a href="#c3-frontend"><span class="dot" style="background:var(--c3)"></span>C3 Frontend</a>
+  <a href="#c3-integrations"><span class="dot" style="background:var(--orange)"></span>C3 Integraciones</a>
+  <a href="#c4-entities"><span class="dot" style="background:var(--c4)"></span>C4 Entidades</a>
+  <a href="#roles"><span class="dot" style="background:var(--green)"></span>Roles</a>
+  <a href="#seq-auth"><span class="dot" style="background:var(--cyan)"></span>Flujo Auth</a>
+  <a href="#seq-crm"><span class="dot" style="background:var(--cyan)"></span>Flujo CRM</a>
+  <a href="#seq-payment"><span class="dot" style="background:var(--cyan)"></span>Flujo Pagos</a>
+  <a href="#seq-inbox"><span class="dot" style="background:var(--cyan)"></span>Flujo Inbox</a>
+  <a href="#deploy"><span class="dot" style="background:var(--yellow)"></span>Deploy</a>
+  <a href="#er-core"><span class="dot" style="background:var(--accent2)"></span>ER Core</a>
+  <a href="#er-agency"><span class="dot" style="background:var(--accent2)"></span>ER Agency</a>
+  <a href="#er-promotora"><span class="dot" style="background:var(--accent2)"></span>ER Promotora</a>
+  <a href="#er-condo"><span class="dot" style="background:var(--accent2)"></span>ER Condominio</a>
+</nav>
+
+<div class="container">
+
+<!-- ==================== C1: CONTEXTO ==================== -->
+<section id="c1">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--c1)">C1</span>
+    <h2>Contexto del Sistema</h2>
+  </div>
+  <p class="section-desc">Vision de pajaro: quienes interactuan con InboMarket, que sistemas externos usa, y el flujo general.</p>
+
+  <div class="diagram-card">
+    <h3>Actores y Sistemas Externos</h3>
+    <pre class="mermaid">
+graph TB
+    subgraph Usuarios["👥 Usuarios del Sistema"]
+        SA["🔑 Super Admin<br/><i>Gestiona plataforma</i>"]
+        AA["🏢 Agency Admin<br/><i>Gestiona inmobiliaria</i>"]
+        BA["📊 Broker Admin<br/><i>Gestiona corredores</i>"]
+        PD["🏗️ Project Developer<br/><i>Gestiona proyectos</i>"]
+        AG["👤 Agente<br/><i>Vende propiedades</i>"]
+        CA["🏘️ Condo Admin<br/><i>Administra condominios</i>"]
+        CL["🛒 Cliente/Comprador<br/><i>Busca propiedades</i>"]
+        ACC["📋 Contabilidad<br/><i>Facturacion</i>"]
+        OPS["🔧 Operaciones<br/><i>Mantenimiento</i>"]
+        LEG["⚖️ Legal<br/><i>Contratos</i>"]
+    end
+
+    subgraph InboMarket["InboMarket SaaS Platform"]
+        WEB["🌐 Dashboard React<br/>SPA + GrapesJS"]
+        API["⚙️ API NestJS<br/>REST + WebSocket"]
+    end
+
+    subgraph Pagos["💳 Procesadores de Pago"]
+        STRIPE[Stripe]
+        PAYPAL[PayPal]
+        AZUL["Azul 🇩🇴"]
+        CARNET["Carnet 🇩🇴"]
+        MERC["MercadoPago"]
+    end
+
+    subgraph Comunicacion["📨 Canales de Comunicacion"]
+        SMTP["Email SMTP"]
+        META["WhatsApp<br/>Meta Cloud API"]
+        SMS["SMS Gateway"]
+    end
+
+    subgraph Infraestructura["🗄️ Infraestructura"]
+        PG[("PostgreSQL 15<br/>127 entidades")]
+        REDIS[("Redis 7<br/>Cache + Colas")]
+    end
+
+    subgraph Externos["🌍 Servicios Externos"]
+        CLOUD["Cloudinary<br/>CDN Imagenes"]
+        OPENAI["OpenAI/LangChain<br/>IA Generativa"]
+        DGII["DGII 🇩🇴<br/>Facturacion Electronica"]
+    end
+
+    SA & AA & BA & PD & AG & CA & CL & ACC & OPS & LEG -->|HTTP/WS| WEB
+    WEB -->|REST API + Socket.io| API
+    API -->|TypeORM| PG
+    API -->|Bull Queue + Cache| REDIS
+    API -->|Pagos| STRIPE & PAYPAL
+    API -.->|TODO| AZUL & CARNET & MERC
+    API -->|Email| SMTP
+    API -->|Mensajes| META
+    API -.->|TODO| SMS
+    API -->|Imagenes| CLOUD
+    API -->|IA| OPENAI
+    API -.->|TODO| DGII
+
+    style InboMarket fill:#1a1a4e,stroke:#7c5cfc,stroke-width:3px,color:#fff
+    style Usuarios fill:#0a2a4e,stroke:#3b82f6,color:#fff
+    style Pagos fill:#2a1a0a,stroke:#f97316,color:#fff
+    style Comunicacion fill:#0a2a2a,stroke:#06b6d4,color:#fff
+    style Infraestructura fill:#1a0a2a,stroke:#8b5cf6,color:#fff
+    style Externos fill:#0a1a0a,stroke:#22c55e,color:#fff
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== C2: CONTENEDORES ==================== -->
+<section id="c2">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--c2)">C2</span>
+    <h2>Contenedores</h2>
+  </div>
+  <p class="section-desc">Las grandes piezas que componen la plataforma, sus tecnologias, y como se comunican.</p>
+
+  <div class="diagram-card">
+    <h3>Arquitectura de Contenedores</h3>
+    <pre class="mermaid">
+graph TB
+    subgraph Client["🖥️ Cliente (Browser)"]
+        DASH["Dashboard SPA<br/><b>React 18 + Vite 5</b><br/>33 features, Redux+Saga<br/>TailwindCSS 4"]
+        PB["Page Builder<br/><b>GrapesJS 0.22</b><br/>Drag &amp; Drop"]
+        MAPS["Mapas<br/><b>Leaflet 1.9</b><br/>Propiedades RD"]
+    end
+
+    subgraph Backend["⚙️ Backend (Node.js)"]
+        CORE["Core Modules (16)<br/><b>NestJS 10</b><br/>Auth, Plans, Billing,<br/>Email, Events, Payments"]
+        BIZ["Business Modules (23)<br/><b>NestJS 10</b><br/>Agency, CRM, Promotora,<br/>Condominium, Marketing"]
+        INT["Integraciones (4)<br/><b>NestJS 10</b><br/>Email, PayPal, WhatsApp,<br/>Registry Core"]
+        WS["WebSocket Gateway<br/><b>Socket.io 4.8</b><br/>Rooms por Tenant"]
+        QUEUE["Job Queue<br/><b>Bull 4.16</b><br/>Bulk uploads, campaigns"]
+        AI["AI Engine<br/><b>LangChain 1.x</b><br/>LangGraph orchestrator"]
+    end
+
+    subgraph Data["🗄️ Persistencia"]
+        PG[("PostgreSQL 15<br/>127 tablas<br/>101+ migraciones")]
+        REDIS[("Redis 7<br/>Cache + Sessions<br/>+ Bull Queue")]
+    end
+
+    subgraph CDN["☁️ CDN"]
+        CLOUD["Cloudinary<br/>Imagenes optimizadas"]
+    end
+
+    DASH -->|HTTP REST| CORE & BIZ
+    DASH <-->|WebSocket| WS
+    PB -->|HTTP| BIZ
+    MAPS -->|HTTP| BIZ
+
+    CORE -->|TypeORM 0.3.17| PG
+    BIZ -->|TypeORM 0.3.17| PG
+    INT -->|TypeORM| PG
+    CORE -->|ioredis| REDIS
+    QUEUE -->|Bull| REDIS
+    BIZ -->|Upload| CLOUD
+
+    CORE --- BIZ
+    BIZ --- INT
+    CORE --> AI
+    CORE --> WS
+    BIZ --> QUEUE
+
+    style Client fill:#1a2a4e,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style Backend fill:#1a1a4e,stroke:#7c5cfc,stroke-width:2px,color:#fff
+    style Data fill:#2a1a3e,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style CDN fill:#0a2a1a,stroke:#22c55e,color:#fff
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== C3: BACKEND ==================== -->
+<section id="c3-backend">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--c3)">C3</span>
+    <h2>Componentes Backend — 39 Modulos</h2>
+  </div>
+  <p class="section-desc">Zoom dentro del backend. Todos los modulos core, de negocio e integraciones con sus relaciones.</p>
+
+  <div class="diagram-card">
+    <h3>Modulos Core (16)</h3>
+    <pre class="mermaid">
+graph LR
+    subgraph Core["CORE MODULES"]
+        SEC["🔒 Security<br/><small>JWT, OAuth, 12 Roles<br/>Guards, Permissions</small>"]
+        PLANS["📋 Plans<br/><small>Suscripciones<br/>Limites por plan</small>"]
+        BILL["💰 Billing<br/><small>Facturas, Cobros<br/>Reconciliacion</small>"]
+        PAY["💳 Payments<br/><small>PaymentIntents<br/>Multi-gateway</small>"]
+        EMAIL["📧 Email<br/><small>Templates, SMTP<br/>Bulk send</small>"]
+        NOTIF["🔔 Notifications<br/><small>Registry<br/>Delivery tracking</small>"]
+        EVENTS["⚡ Events<br/><small>DomainEventBus<br/>EventStore</small>"]
+        WS["🔌 WebSocket<br/><small>Socket.io<br/>Rooms/tenant</small>"]
+        ADMIN["👑 Admin<br/><small>Dashboard<br/>Reportes</small>"]
+        AUDIT["📝 Audit<br/><small>Compliance<br/>Action logs</small>"]
+        HEALTH["❤️ Health<br/><small>System checks<br/>Monitoring</small>"]
+        DB["🗄️ Database<br/><small>TypeORM config<br/>ALL_ENTITIES</small>"]
+        ALGO["🧮 Algorithms<br/><small>Business rules<br/>Calculations</small>"]
+        DT["📅 DateTime<br/><small>Timezone<br/>Utilities</small>"]
+        COMMON["🔧 Common<br/><small>Decorators<br/>Shared guards</small>"]
+        SUBPOL["📜 SubPolicies<br/><small>Role-plan<br/>Mapping</small>"]
+    end
+
+    SEC --> PLANS
+    PLANS --> BILL
+    BILL --> PAY
+    EMAIL --> NOTIF
+    EVENTS --> AUDIT
+    SEC --> COMMON
+
+    style Core fill:#0d1a3a,stroke:#3b82f6,stroke-width:2px,color:#fff
+    </pre>
+  </div>
+
+  <div class="diagram-card">
+    <h3>Modulos de Negocio (23) — Relaciones</h3>
+    <pre class="mermaid">
+graph TB
+    subgraph RealEstate["🏠 Inmobiliaria"]
+        CAT["Catalog<br/><small>Propiedades, Categorias<br/>Tags, Media</small>"]
+        CRM["CRM<br/><small>Leads, Oportunidades<br/>23 funnel stages</small>"]
+        AGY["Agency<br/><small>Pipeline, Contratos<br/>Proyectos, Tareas</small>"]
+        AGT["Agente<br/><small>Clientes, Citas<br/>Ventas</small>"]
+        BRK["Broker<br/><small>Metas<br/>Comisiones</small>"]
+    end
+
+    subgraph Development["🏗️ Desarrollo"]
+        PROM["Promotora<br/><small>26 entidades<br/>Proyectos, Unidades<br/>Ventas, 7 pagos</small>"]
+    end
+
+    subgraph Living["🏘️ Vivienda"]
+        CONDO["Condominium<br/><small>15 entidades<br/>Residentes, Unidades<br/>Mantenimiento, Ley 5038</small>"]
+    end
+
+    subgraph Communication["📨 Comunicacion"]
+        MKT["Marketing<br/><small>Email Campaigns<br/>WhatsApp Campaigns</small>"]
+        INBOX["Inbox<br/><small>Conversaciones<br/>Mensajes omnicanal</small>"]
+        MSG["Messaging<br/><small>Email transport</small>"]
+        CHAT["ChatBot<br/><small>Conversaciones IA</small>"]
+    end
+
+    subgraph Financial["💰 Finanzas"]
+        FIN["Financial<br/><small>Facturas, Pagos<br/>Comisiones, Impuestos</small>"]
+        INV["Invoices<br/><small>Facturacion</small>"]
+        PAYINT["Payments<br/>Integration<br/><small>Stripe, PayPal<br/>Azul, Carnet</small>"]
+    end
+
+    subgraph Platform["🔧 Plataforma"]
+        COMP["Company<br/><small>TenantEntity<br/>Multi-tenant</small>"]
+        MODS["Modules<br/><small>Marketplace<br/>6 entidades</small>"]
+        WEB["Webpage<br/><small>GrapesJS<br/>Page Builder</small>"]
+        AI["AI<br/><small>LangChain<br/>OpenAI</small>"]
+        STORE["Storage<br/><small>Cloudinary<br/>Archivos</small>"]
+        FOLD["Folders<br/><small>Organizacion</small>"]
+        REP["Reports<br/><small>Analytics</small>"]
+        CONT["Contacts<br/><small>Contactos</small>"]
+        RESTMPL["Resources<br/>Templates<br/><small>Templates</small>"]
+    end
+
+    CAT -->|propiedades| CRM
+    CRM -->|leads| AGY
+    AGY -->|contratos| FIN
+    AGT -->|ventas| CRM
+    BRK -->|supervisa| AGT
+
+    PROM -->|pagos| PAYINT
+    CONDO -->|cobros| FIN
+
+    MKT -->|campanas| EMAIL_EXT["EmailModule"]
+    INBOX -->|despacha| MKT
+    CHAT -->|IA| AI
+
+    FIN -->|cobra| PAYINT
+
+    COMP -.->|tenant context| CAT & CRM & AGY & PROM & CONDO
+
+    style RealEstate fill:#0d2a1a,stroke:#22c55e,stroke-width:2px,color:#fff
+    style Development fill:#2a1a0a,stroke:#f97316,stroke-width:2px,color:#fff
+    style Living fill:#0a1a2a,stroke:#06b6d4,stroke-width:2px,color:#fff
+    style Communication fill:#1a0a2a,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Financial fill:#2a2a0a,stroke:#eab308,stroke-width:2px,color:#fff
+    style Platform fill:#1a1a1a,stroke:#6b7280,stroke-width:2px,color:#fff
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== C3: FRONTEND ==================== -->
+<section id="c3-frontend">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--c3)">C3</span>
+    <h2>Componentes Frontend — 33 Features</h2>
+  </div>
+  <p class="section-desc">Organizacion del Dashboard React por features, con 34 Redux slices y lazy loading.</p>
+
+  <div class="diagram-card">
+    <h3>Arquitectura Frontend</h3>
+    <pre class="mermaid">
+graph TB
+    subgraph App["🌐 App Shell"]
+        ROUTER["React Router v6<br/><small>Lazy loading</small>"]
+        REDUX["Redux Store<br/><small>34 slices + 20 sagas</small>"]
+        SOCKET["WebSocket Client<br/><small>Socket.io</small>"]
+        SESSION["Session Manager<br/><small>Cookie-based auth</small>"]
+    end
+
+    subgraph AdminFeatures["👑 Super Admin"]
+        F_ADMIN["admin<br/><small>Tenants, Plans<br/>Modules, Billing</small>"]
+        F_TENANT["tenants<br/><small>CRUD tenants</small>"]
+        F_WEB["webpage<br/><small>GrapesJS Builder</small>"]
+        F_ROLES["roles<br/><small>Gestion roles</small>"]
+    end
+
+    subgraph AgencyFeatures["🏢 Inmobiliaria"]
+        F_AGENCY["agency<br/><small>Dashboard, Props<br/>Agents, CRM, ERP<br/>50+ rutas</small>"]
+        F_AGENT["agente<br/><small>Props, Clients<br/>Quotes, 17 rutas</small>"]
+        F_BROKER["broker<br/><small>Properties, Leads<br/>Commissions, 20 rutas</small>"]
+        F_CRM["crm<br/><small>Pipeline, Funnels<br/>Stages</small>"]
+    end
+
+    subgraph ClientFeatures["🛒 Cliente"]
+        F_CLIENT["client<br/><small>Dashboard, Favs<br/>Appointments</small>"]
+        F_PUBLIC["public<br/><small>Listings<br/>Property detail</small>"]
+    end
+
+    subgraph SpecialFeatures["⚙️ Modulos Especiales"]
+        F_PROM["promotora<br/><small>Projects, Units<br/>Leads, Billing</small>"]
+        F_CONDO["condominium<br/><small>Residents, Units<br/>Billing, 45+ rutas</small>"]
+        F_LEGAL["legal<br/><small>Contracts, Audit</small>"]
+        F_ACC["accounting<br/><small>Invoices, Payments</small>"]
+        F_OPS["operational<br/><small>Maintenance</small>"]
+    end
+
+    subgraph SharedFeatures["🔄 Compartidos"]
+        F_SHARED["agents-shared<br/>clients-shared<br/>properties-shared<br/>settings-shared"]
+        F_CHAT["chatbot + ai-text"]
+        F_MKT["marketing + inbox"]
+        F_NOTIF["notifications"]
+        F_SECURITY["security<br/><small>Login, Register<br/>OAuth, Onboarding</small>"]
+    end
+
+    ROUTER --> AdminFeatures & AgencyFeatures & ClientFeatures & SpecialFeatures
+    REDUX --> SharedFeatures
+    SharedFeatures --> AgencyFeatures & SpecialFeatures
+
+    style App fill:#1a1a3e,stroke:#7c5cfc,stroke-width:2px,color:#fff
+    style AdminFeatures fill:#2a0a0a,stroke:#ef4444,stroke-width:2px,color:#fff
+    style AgencyFeatures fill:#0a2a1a,stroke:#22c55e,stroke-width:2px,color:#fff
+    style ClientFeatures fill:#2a2a0a,stroke:#eab308,stroke-width:2px,color:#fff
+    style SpecialFeatures fill:#0a1a2a,stroke:#06b6d4,stroke-width:2px,color:#fff
+    style SharedFeatures fill:#1a1a1a,stroke:#6b7280,stroke-width:2px,color:#fff
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== C3: INTEGRACIONES ==================== -->
+<section id="c3-integrations">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--orange)">INT</span>
+    <h2>Integraciones Externas</h2>
+  </div>
+  <p class="section-desc">Todos los servicios externos, webhooks, y el sistema de registro de integraciones.</p>
+
+  <div class="diagram-card">
+    <h3>Mapa de Integraciones</h3>
+    <pre class="mermaid">
+graph LR
+    subgraph Registry["Integration Registry"]
+        REG["IntegrationRegistryService<br/><small>Discovery + Config</small>"]
+        ENT[("IntegrationEntity<br/><small>Config por tenant<br/>JSONB credentials</small>")]
+    end
+
+    subgraph Payments["💳 Pagos"]
+        STRIPE["Stripe SDK 20<br/><small>Cards, Intents<br/>Webhook: /stripe/webhook</small>"]
+        PAYPAL["PayPal SDK 2<br/><small>Orders, Capture<br/>Webhook: /paypal/webhook</small>"]
+        AZUL["Azul 🇩🇴<br/><small>TODO</small>"]
+        CARNET["Carnet 🇩🇴<br/><small>TODO</small>"]
+        MERC["MercadoPago<br/><small>TODO</small>"]
+    end
+
+    subgraph Messaging["📨 Mensajeria"]
+        SMTP["SMTP/Nodemailer 7<br/><small>Email transaccional<br/>+ Bulk campaigns</small>"]
+        WHATS["WhatsApp Cloud API<br/><small>Meta Graph v18<br/>Webhook: /webhooks/whatsapp</small>"]
+        SENDGRID["SendGrid<br/><small>Email SaaS</small>"]
+    end
+
+    subgraph AI["🤖 IA"]
+        OPENAI["OpenAI<br/><small>GPT-3.5/4<br/>LangChain + LangGraph</small>"]
+    end
+
+    subgraph Storage["☁️ Storage"]
+        CLOUDY["Cloudinary 2.7<br/><small>CDN imagenes<br/>Auto-transform</small>"]
+    end
+
+    subgraph Realtime["⚡ Realtime"]
+        SOCKETIO["Socket.io 4.8<br/><small>WebSocket<br/>Rooms: broker, inbox,<br/>project, conversation</small>"]
+    end
+
+    subgraph Queue["📋 Colas"]
+        BULL["Bull 4.16 + Redis<br/><small>Bulk uploads<br/>Email campaigns<br/>File processing</small>"]
+    end
+
+    REG --> STRIPE & PAYPAL & SMTP & WHATS & CLOUDY & OPENAI
+    ENT --> REG
+
+    style Registry fill:#1a1a3e,stroke:#7c5cfc,stroke-width:2px,color:#fff
+    style Payments fill:#2a1a0a,stroke:#f97316,stroke-width:2px,color:#fff
+    style Messaging fill:#0a2a2a,stroke:#06b6d4,stroke-width:2px,color:#fff
+    style AI fill:#2a0a2a,stroke:#c084fc,stroke-width:2px,color:#fff
+    style Storage fill:#0a2a0a,stroke:#22c55e,stroke-width:2px,color:#fff
+    style Realtime fill:#2a2a0a,stroke:#eab308,stroke-width:2px,color:#fff
+    style Queue fill:#1a0a0a,stroke:#ef4444,stroke-width:2px,color:#fff
+    </pre>
+  </div>
+
+  <table class="info-table">
+    <thead>
+      <tr><th>Integracion</th><th>Estado</th><th>Webhook</th><th>Config Keys</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Stripe</td><td style="color:#22c55e">✅ Activo</td><td>POST /stripe/webhook</td><td>STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET</td></tr>
+      <tr><td>PayPal</td><td style="color:#22c55e">✅ Activo</td><td>POST /paypal/webhook</td><td>PAYPAL_CLIENT_ID, PAYPAL_SECRET</td></tr>
+      <tr><td>WhatsApp Meta</td><td style="color:#22c55e">✅ Activo</td><td>GET|POST /webhooks/whatsapp</td><td>WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID</td></tr>
+      <tr><td>Email SMTP</td><td style="color:#22c55e">✅ Activo</td><td>—</td><td>SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS</td></tr>
+      <tr><td>Cloudinary</td><td style="color:#22c55e">✅ Activo</td><td>—</td><td>CLOUDINARY_CLOUD_NAME, API_KEY, API_SECRET</td></tr>
+      <tr><td>OpenAI</td><td style="color:#22c55e">✅ Activo</td><td>—</td><td>OPENAI_API_KEY, OPENAI_MODEL</td></tr>
+      <tr><td>Socket.io</td><td style="color:#22c55e">✅ Activo</td><td>—</td><td>—</td></tr>
+      <tr><td>Azul 🇩🇴</td><td style="color:#f97316">🔧 TODO</td><td>—</td><td>—</td></tr>
+      <tr><td>Carnet 🇩🇴</td><td style="color:#f97316">🔧 TODO</td><td>—</td><td>—</td></tr>
+      <tr><td>MercadoPago</td><td style="color:#f97316">🔧 TODO</td><td>—</td><td>—</td></tr>
+      <tr><td>DGII Fiscal</td><td style="color:#f97316">🔧 TODO</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ==================== C4: ENTIDADES CLAVE ==================== -->
+<section id="c4-entities">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--c4)">C4</span>
+    <h2>Entidades Clave — 127 Tablas</h2>
+  </div>
+  <p class="section-desc">Las entidades mas importantes del sistema agrupadas por dominio.</p>
+
+  <div class="diagram-card">
+    <h3>Distribucion de Entidades por Dominio</h3>
+    <pre class="mermaid">
+pie title Entidades por Dominio (127 total)
+    "Promotora" : 26
+    "Condominium" : 15
+    "Agency/Pipeline" : 10
+    "Security/Auth" : 7
+    "Financial" : 7
+    "Marketing" : 5
+    "Modules/Marketplace" : 6
+    "Plans/Billing" : 9
+    "Catalog" : 4
+    "CRM" : 3
+    "Webpage" : 4
+    "Integrations" : 3
+    "Inbox" : 2
+    "AI/ChatBot" : 4
+    "Otros" : 22
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== ROLES ==================== -->
+<section id="roles">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--green)">RBAC</span>
+    <h2>Sistema de Roles — 12 Roles</h2>
+  </div>
+  <p class="section-desc">Control de acceso basado en roles con permisos granulares por modulo y tenant.</p>
+
+  <div class="diagram-card">
+    <h3>Jerarquia de Roles</h3>
+    <pre class="mermaid">
+graph TB
+    SA["🔑 SUPER_ADMIN<br/><small>Plataforma completa<br/>Plans, Modules, Tenants</small>"]
+
+    subgraph Business["Roles de Negocio (Admin)"]
+        AA["🏢 AGENCY_ADMIN<br/><small>Propiedades, CRM<br/>ERP, Comisiones</small>"]
+        BA["📊 BROKER_MANAGER_ADMIN<br/><small>Corredores, Agentes<br/>Propiedades</small>"]
+        PD["🏗️ PROJECT_DEVELOPER_ADMIN<br/><small>Proyectos, Unidades<br/>Ventas, Pagos</small>"]
+        AGU["👤 AGENCY_AGENT_USER<br/><small>Leads, Citas<br/>Propiedades asignadas</small>"]
+    end
+
+    subgraph Support["Roles de Soporte"]
+        CA["🏘️ CONDOMINIUM_ADMIN<br/><small>Condominios, Cobros<br/>Mantenimiento</small>"]
+        ACC["📋 ACCOUNTING_TEAM<br/><small>Facturacion, NCF<br/>Reportes</small>"]
+        OPS["🔧 OPERATIONAL_TEAM<br/><small>Mantenimiento<br/>Check-in/out</small>"]
+        LEG["⚖️ LEGAL_MODULE<br/><small>Contratos, Firmas<br/>Auditoria</small>"]
+    end
+
+    subgraph Clients["Roles Cliente"]
+        BC["🛒 BUYER_CLIENT<br/><small>Buscar, Favoritos<br/>Agendar visitas</small>"]
+        PO["⏳ PENDING_ONBOARDING<br/><small>Registro incompleto</small>"]
+    end
+
+    SA -->|gestiona| Business
+    SA -->|gestiona| Support
+    AA -->|supervisa| AGU
+    BA -->|supervisa| AGU
+    PO -->|completa| BC
+
+    style SA fill:#7c5cfc,stroke:#fff,color:#fff
+    style Business fill:#0a2a4e,stroke:#3b82f6,color:#fff
+    style Support fill:#0a2a1a,stroke:#22c55e,color:#fff
+    style Clients fill:#2a2a0a,stroke:#eab308,color:#fff
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== SECUENCIA: AUTH ==================== -->
+<section id="seq-auth">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--cyan)">SEQ</span>
+    <h2>Flujo de Autenticacion</h2>
+  </div>
+
+  <div class="diagram-card">
+    <h3>Login + JWT + Multi-Tenant</h3>
+    <pre class="mermaid">
+sequenceDiagram
+    actor U as Usuario
+    participant WEB as Dashboard React
+    participant API as NestJS API
+    participant SEC as SecurityModule
+    participant DB as PostgreSQL
+    participant REDIS as Redis
+
+    U->>WEB: Ingresa email + password
+    WEB->>API: POST /auth/login {email, password}
+    API->>SEC: validateUser()
+    SEC->>DB: SELECT user WHERE email AND tenantId
+    DB-->>SEC: UserEntity + RoleEntity
+    SEC->>SEC: bcrypt.compare(password, hash)
+    SEC->>SEC: generateJWT({sub, email, role, tenant})
+    SEC-->>API: {accessToken, refreshToken}
+    API-->>WEB: Set-Cookie: auth_token (HTTP-only)<br/>Set-Cookie: refresh_token
+    WEB->>WEB: SessionService.saveSession()<br/>Cookie: user_data (JSON)
+    WEB-->>U: Redirect → /{role}/dashboard
+
+    Note over WEB,API: Token expira cada 8h
+
+    U->>WEB: Navega a ruta protegida
+    WEB->>API: GET /api/v1/resource<br/>Cookie: auth_token
+    API->>SEC: JwtAuthGuard.validate()
+    SEC->>SEC: Extraer tenantId del JWT
+    API->>DB: Query con WHERE tenantId = :tid
+    DB-->>API: Datos filtrados por tenant
+    API-->>WEB: Response
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== SECUENCIA: CRM ==================== -->
+<section id="seq-crm">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--cyan)">SEQ</span>
+    <h2>Flujo CRM — Lead a Venta</h2>
+  </div>
+
+  <div class="diagram-card">
+    <h3>Pipeline de Ventas Inmobiliarias</h3>
+    <pre class="mermaid">
+sequenceDiagram
+    actor CL as Cliente
+    participant WEB as Portal Publico
+    participant API as API NestJS
+    participant CRM as CRMModule
+    participant AGY as AgencyModule
+    participant EMAIL as EmailModule
+    participant WS as WebSocket
+
+    CL->>WEB: Solicita info de propiedad
+    WEB->>API: POST /crm/leads {name, email, phone, propertyId}
+    API->>CRM: createLead()
+    CRM->>CRM: Asignar stage: INITIAL_CONTACT
+    CRM->>CRM: Lead Scoring (algoritmo)
+    CRM-->>API: LeadEntity creada
+
+    API->>EMAIL: sendEmail(LEAD_NOTIFICATION, agentEmail)
+    API->>WS: emit('broker:new-lead', lead)
+    WS-->>AGY: Notificacion real-time
+
+    Note over CRM: Agente trabaja el lead
+
+    AGY->>API: PUT /crm/leads/:id/stage {stage: QUALIFIED}
+    API->>CRM: updateStage()
+    CRM->>CRM: Registrar interaccion
+
+    AGY->>API: POST /agency/quotes {leadId, propertyId, price}
+    API->>AGY: createQuote()
+    AGY-->>API: QuoteEntity
+
+    AGY->>API: POST /agency/contracts {quoteId, terms}
+    API->>AGY: createContract()
+    AGY->>CRM: updateStage(CLOSED_WON)
+    AGY->>WS: emit('broker:closure', sale)
+
+    API->>EMAIL: sendEmail(SALE_CONFIRMATION, client)
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== SECUENCIA: PAGOS ==================== -->
+<section id="seq-payment">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--cyan)">SEQ</span>
+    <h2>Flujo de Pagos</h2>
+  </div>
+
+  <div class="diagram-card">
+    <h3>Procesamiento Multi-Gateway (Stripe + PayPal)</h3>
+    <pre class="mermaid">
+sequenceDiagram
+    actor U as Usuario
+    participant WEB as Dashboard
+    participant API as API NestJS
+    participant PAY as PaymentsModule
+    participant STRIPE as Stripe API
+    participant DB as PostgreSQL
+    participant EMAIL as EmailModule
+
+    U->>WEB: Selecciona plan + metodo pago
+    WEB->>API: POST /payments/create-intent {planId, gateway: 'stripe'}
+    API->>PAY: createPaymentIntent()
+    PAY->>STRIPE: stripe.paymentIntents.create({amount, currency})
+    STRIPE-->>PAY: {clientSecret, intentId}
+    PAY->>DB: INSERT PaymentIntentEntity (status: PENDING)
+    PAY-->>WEB: {clientSecret}
+
+    WEB->>STRIPE: stripe.confirmPayment(clientSecret)
+    STRIPE-->>WEB: Payment confirmed
+
+    Note over STRIPE,API: Webhook asíncrono
+
+    STRIPE->>API: POST /stripe/webhook {payment_intent.succeeded}
+    API->>PAY: handleWebhook()
+    PAY->>DB: UPDATE PaymentIntent SET status=COMPLETED
+    PAY->>DB: UPDATE Subscription SET status=ACTIVE
+    PAY->>EMAIL: sendEmail(PAYMENT_CONFIRMATION, user)
+    PAY->>PAY: DomainEventBus.publish('payment.completed')
+    API-->>STRIPE: 200 OK
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== SECUENCIA: INBOX ==================== -->
+<section id="seq-inbox">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--cyan)">SEQ</span>
+    <h2>Flujo Inbox Omnicanal</h2>
+  </div>
+
+  <div class="diagram-card">
+    <h3>WhatsApp Entrante + Email Saliente</h3>
+    <pre class="mermaid">
+sequenceDiagram
+    actor CL as Cliente (WhatsApp)
+    participant META as Meta Graph API
+    participant HOOK as WebhookController
+    participant WA as WhatsAppService
+    participant INBOX as InboxService
+    participant WS as InboxGateway
+    actor AG as Agente (Dashboard)
+    participant DISP as ChannelDispatcher
+    participant SMTP as SMTP Server
+
+    CL->>META: Envia mensaje WhatsApp
+    META->>HOOK: POST /webhooks/whatsapp {payload}
+    HOOK->>HOOK: resolveTenantFromPayload()
+    HOOK->>WA: processWebhook(payload, tenantId)
+    WA->>INBOX: findConversationByContact(phone)
+
+    alt Conversacion nueva
+        WA->>INBOX: createConversation(channel:'whatsapp')
+    end
+
+    WA->>INBOX: sendMessage(INBOUND, content)
+    INBOX->>INBOX: Guardar en DB
+    INBOX->>WS: emitNewMessage(conversationId)
+    WS-->>AG: Real-time: nuevo mensaje
+
+    Note over AG: Agente responde por email
+
+    AG->>INBOX: POST /inbox/:id/messages {content, channel:'email'}
+    INBOX->>INBOX: Guardar mensaje OUTBOUND
+    INBOX->>DISP: dispatch(conversation, message)
+    DISP->>SMTP: sendEmail(to, subject, html)
+    SMTP-->>DISP: OK
+    INBOX->>WS: emitNewMessage()
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== DEPLOY ==================== -->
+<section id="deploy">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--yellow)">INFRA</span>
+    <h2>Diagrama de Despliegue</h2>
+  </div>
+
+  <div class="diagram-card">
+    <h3>Stack Docker Compose</h3>
+    <pre class="mermaid">
+graph TB
+    subgraph Docker["🐳 Docker Compose"]
+        subgraph Frontend["Frontend Container"]
+            VITE["Vite Dev Server<br/>:5174"]
+        end
+
+        subgraph Backend["API Container"]
+            NEST["NestJS App<br/>:3009"]
+            BULL_W["Bull Workers"]
+            WS_G["WebSocket Gateway"]
+        end
+
+        subgraph Database["Database Container"]
+            PG[("PostgreSQL 15<br/>:5434<br/>127 tablas")]
+        end
+
+        subgraph Cache["Redis Container"]
+            RED[("Redis 7 Alpine<br/>:6379")]
+        end
+
+        subgraph Admin["Admin Tools"]
+            PGA["pgAdmin 4<br/>:8080"]
+            MAIL["MailHog<br/>:8025"]
+        end
+    end
+
+    subgraph External["Servicios Externos"]
+        CDN["Cloudinary CDN"]
+        STRIPE_E["Stripe"]
+        META_E["Meta WhatsApp"]
+        OAI["OpenAI"]
+    end
+
+    VITE -->|REST + WS| NEST
+    NEST -->|TypeORM| PG
+    NEST -->|ioredis| RED
+    BULL_W -->|Bull| RED
+    PGA -->|admin| PG
+    NEST -->|SMTP| MAIL
+
+    NEST -->|HTTPS| CDN & STRIPE_E & META_E & OAI
+
+    style Docker fill:#0a0a2e,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style Frontend fill:#1a2a1a,stroke:#22c55e,color:#fff
+    style Backend fill:#1a1a3e,stroke:#7c5cfc,color:#fff
+    style Database fill:#2a1a3e,stroke:#8b5cf6,color:#fff
+    style Cache fill:#2a0a0a,stroke:#ef4444,color:#fff
+    style Admin fill:#1a1a1a,stroke:#6b7280,color:#fff
+    style External fill:#0a2a2a,stroke:#06b6d4,color:#fff
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== ER: CORE ==================== -->
+<section id="er-core">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--accent2)">ER</span>
+    <h2>ER — Core (Security + Plans + Billing)</h2>
+  </div>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+erDiagram
+    USERS {
+        uuid id PK
+        uuid tenantId FK
+        string email
+        string password
+        string firstName
+        string lastName
+        enum role
+        boolean isActive
+        timestamp createdAt
+    }
+    ROLES {
+        uuid id PK
+        string name
+        string description
+    }
+    PERMISSIONS {
+        uuid id PK
+        string resource
+        string action
+    }
+    ROLE_PERMISSIONS {
+        uuid roleId FK
+        uuid permissionId FK
+    }
+    TENANTS {
+        uuid id PK
+        string name
+        string domain
+        string email
+        enum status
+        uuid planId FK
+    }
+    PLANS {
+        uuid id PK
+        string name
+        decimal price
+        int maxUsers
+        int maxProperties
+        int maxLeads
+        int maxStorage
+    }
+    SUBSCRIPTIONS {
+        uuid id PK
+        uuid tenantId FK
+        uuid planId FK
+        enum status
+        date startDate
+        date endDate
+        enum billingCycle
+    }
+    BILLING_INVOICES {
+        uuid id PK
+        uuid tenantId FK
+        decimal amount
+        enum status
+        date dueDate
+    }
+    PAYMENT_INTENTS {
+        uuid id PK
+        uuid tenantId FK
+        string gateway
+        decimal amount
+        enum status
+        string externalId
+    }
+
+    USERS }o--|| TENANTS : "pertenece a"
+    USERS }o--|| ROLES : "tiene"
+    ROLES ||--o{ ROLE_PERMISSIONS : "tiene"
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : "asignado"
+    TENANTS ||--o{ SUBSCRIPTIONS : "tiene"
+    PLANS ||--o{ SUBSCRIPTIONS : "define"
+    TENANTS ||--o{ BILLING_INVOICES : "facturado"
+    TENANTS ||--o{ PAYMENT_INTENTS : "paga"
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== ER: AGENCY ==================== -->
+<section id="er-agency">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--accent2)">ER</span>
+    <h2>ER — Agency + CRM + Catalog</h2>
+  </div>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+erDiagram
+    PROPERTIES {
+        uuid id PK
+        uuid tenantId FK
+        string title
+        text description
+        decimal price
+        decimal size
+        int bedrooms
+        int bathrooms
+        enum type
+        enum status
+        string address
+        string city
+        float latitude
+        float longitude
+        jsonb customFields
+    }
+    CATEGORIES {
+        uuid id PK
+        string name
+    }
+    TAGS {
+        uuid id PK
+        string name
+    }
+    MEDIA {
+        uuid id PK
+        uuid propertyId FK
+        string url
+        enum type
+    }
+    LEADS {
+        uuid id PK
+        uuid tenantId FK
+        string name
+        string email
+        string phone
+        enum stage
+        int score
+        uuid propertyId FK
+        uuid agentId FK
+    }
+    OPPORTUNITIES {
+        uuid id PK
+        uuid leadId FK
+        decimal amount
+        enum stage
+    }
+    INTERACTIONS {
+        uuid id PK
+        uuid leadId FK
+        enum type
+        text content
+        timestamp date
+    }
+    AGENTS {
+        uuid id PK
+        uuid tenantId FK
+        uuid userId FK
+        string specialization
+        boolean isActive
+    }
+    PIPELINES {
+        uuid id PK
+        uuid tenantId FK
+        string name
+    }
+    PIPELINE_STAGES {
+        uuid id PK
+        uuid pipelineId FK
+        string name
+        int order
+    }
+    QUOTES {
+        uuid id PK
+        uuid leadId FK
+        uuid propertyId FK
+        decimal amount
+        enum status
+    }
+    CONTRACTS {
+        uuid id PK
+        uuid quoteId FK
+        enum status
+        date startDate
+    }
+
+    PROPERTIES ||--o{ MEDIA : "tiene"
+    PROPERTIES }o--|| CATEGORIES : "categoria"
+    LEADS }o--|| PROPERTIES : "interesado en"
+    LEADS }o--|| AGENTS : "asignado a"
+    LEADS ||--o{ INTERACTIONS : "registra"
+    LEADS ||--o{ OPPORTUNITIES : "genera"
+    PIPELINES ||--o{ PIPELINE_STAGES : "tiene"
+    QUOTES }o--|| LEADS : "para"
+    QUOTES }o--|| PROPERTIES : "sobre"
+    CONTRACTS }o--|| QUOTES : "formaliza"
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== ER: PROMOTORA ==================== -->
+<section id="er-promotora">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--accent2)">ER</span>
+    <h2>ER — Promotora (26 entidades)</h2>
+  </div>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+erDiagram
+    PROMOTORA_PROJECTS {
+        uuid id PK
+        uuid tenantId FK
+        string name
+        enum status
+        string location
+        int totalUnits
+    }
+    PROMOTORA_PHASES {
+        uuid id PK
+        uuid projectId FK
+        string name
+        date startDate
+        date endDate
+    }
+    PROMOTORA_UNITS {
+        uuid id PK
+        uuid projectId FK
+        string code
+        decimal price
+        decimal size
+        enum status
+        enum type
+    }
+    PROMOTORA_LEADS {
+        uuid id PK
+        uuid projectId FK
+        string name
+        string email
+        enum stage
+    }
+    PROMOTORA_RESERVATIONS {
+        uuid id PK
+        uuid unitId FK
+        uuid leadId FK
+        decimal amount
+        enum status
+    }
+    PROMOTORA_SALES {
+        uuid id PK
+        uuid unitId FK
+        uuid reservationId FK
+        decimal totalPrice
+        enum status
+    }
+    PAYMENT_PLAN_TEMPLATES {
+        uuid id PK
+        string name
+        int installments
+        decimal downPayment
+    }
+    PAYMENT_SCHEDULES {
+        uuid id PK
+        uuid saleId FK
+        decimal amount
+        date dueDate
+        enum status
+    }
+    PAYMENT_TRANSACTIONS {
+        uuid id PK
+        uuid scheduleId FK
+        decimal amount
+        string gateway
+        enum status
+    }
+    AGENCY_PARTNERS {
+        uuid id PK
+        uuid projectId FK
+        string agencyName
+        decimal commissionRate
+    }
+
+    PROMOTORA_PROJECTS ||--o{ PROMOTORA_PHASES : "tiene fases"
+    PROMOTORA_PROJECTS ||--o{ PROMOTORA_UNITS : "tiene unidades"
+    PROMOTORA_PROJECTS ||--o{ PROMOTORA_LEADS : "atrae"
+    PROMOTORA_UNITS ||--o{ PROMOTORA_RESERVATIONS : "reservada"
+    PROMOTORA_LEADS ||--o{ PROMOTORA_RESERVATIONS : "reserva"
+    PROMOTORA_RESERVATIONS ||--o{ PROMOTORA_SALES : "convierte"
+    PROMOTORA_SALES ||--o{ PAYMENT_SCHEDULES : "plan de pago"
+    PAYMENT_SCHEDULES ||--o{ PAYMENT_TRANSACTIONS : "pagos"
+    PROMOTORA_PROJECTS ||--o{ AGENCY_PARTNERS : "colabora"
+    </pre>
+  </div>
+</section>
+
+<!-- ==================== ER: CONDOMINIUM ==================== -->
+<section id="er-condo">
+  <div class="section-header">
+    <span class="level-badge" style="background:var(--accent2)">ER</span>
+    <h2>ER — Condominium (15 entidades, Ley 5038)</h2>
+  </div>
+
+  <div class="diagram-card">
+    <pre class="mermaid">
+erDiagram
+    CONDOMINIUMS {
+        uuid id PK
+        uuid tenantId FK
+        string name
+        string address
+        int totalUnits
+        enum type
+    }
+    UNITS {
+        uuid id PK
+        uuid condominiumId FK
+        string number
+        decimal size
+        enum type
+        decimal aliquot
+    }
+    RESIDENTS {
+        uuid id PK
+        uuid unitId FK
+        string name
+        string email
+        string phone
+        enum type
+        boolean isActive
+    }
+    CONDO_INVOICES {
+        uuid id PK
+        uuid unitId FK
+        decimal amount
+        enum status
+        date dueDate
+        string concept
+    }
+    RECURRING_INVOICES {
+        uuid id PK
+        uuid condominiumId FK
+        string concept
+        decimal amount
+        enum frequency
+    }
+    CONDO_PAYMENTS {
+        uuid id PK
+        uuid invoiceId FK
+        decimal amount
+        string method
+        date paidAt
+    }
+    MAINTENANCE_REQUESTS {
+        uuid id PK
+        uuid condominiumId FK
+        uuid unitId FK
+        string description
+        enum priority
+        enum status
+    }
+    PROVIDERS {
+        uuid id PK
+        uuid tenantId FK
+        string name
+        string specialty
+    }
+    COMMON_AREAS {
+        uuid id PK
+        uuid condominiumId FK
+        string name
+        int capacity
+    }
+    AREA_RESERVATIONS {
+        uuid id PK
+        uuid areaId FK
+        uuid residentId FK
+        date reservedDate
+    }
+    COLLABORATORS {
+        uuid id PK
+        uuid condominiumId FK
+        string name
+        string role
+    }
+
+    CONDOMINIUMS ||--o{ UNITS : "tiene"
+    UNITS ||--o{ RESIDENTS : "habitan"
+    UNITS ||--o{ CONDO_INVOICES : "facturado"
+    CONDO_INVOICES ||--o{ CONDO_PAYMENTS : "pagos"
+    CONDOMINIUMS ||--o{ RECURRING_INVOICES : "genera"
+    CONDOMINIUMS ||--o{ MAINTENANCE_REQUESTS : "reporta"
+    CONDOMINIUMS ||--o{ COMMON_AREAS : "tiene"
+    COMMON_AREAS ||--o{ AREA_RESERVATIONS : "reserva"
+    RESIDENTS ||--o{ AREA_RESERVATIONS : "reserva"
+    CONDOMINIUMS ||--o{ COLLABORATORS : "empleados"
+    MAINTENANCE_REQUESTS }o--|| PROVIDERS : "asignado"
+    </pre>
+  </div>
+</section>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  <p><strong>InboMarket</strong> — SaaS Gestion Inmobiliaria Multi-Tenant</p>
+  <p>Republica Dominicana | <a href="https://github.com/camiloop96">Camilo Polania</a> | Documentado por TINA (SOUL CORE #35)</p>
+  <p style="margin-top:8px; font-size:0.8em;">Generado: 2026-02-19 | Metodologia C4 + Mermaid.js v11</p>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1a1a4e',
+      primaryTextColor: '#e0e0f0',
+      primaryBorderColor: '#7c5cfc',
+      lineColor: '#6b7280',
+      secondaryColor: '#0a2a4e',
+      tertiaryColor: '#2a1a3e',
+      noteBkgColor: '#1a1a3e',
+      noteTextColor: '#e0e0f0',
+      noteBorderColor: '#7c5cfc',
+      actorBkg: '#1a1a4e',
+      actorTextColor: '#e0e0f0',
+      actorBorder: '#7c5cfc',
+      signalColor: '#e0e0f0',
+      labelBoxBkgColor: '#0d0d1a',
+      labelBoxBorderColor: '#7c5cfc',
+      labelTextColor: '#e0e0f0',
+      loopTextColor: '#c084fc',
+      activationBorderColor: '#7c5cfc',
+      activationBkgColor: '#1a1a4e',
+      sequenceNumberColor: '#7c5cfc',
+      sectionBkgColor: '#0d0d1a',
+      altSectionBkgColor: '#141428',
+      pieTitleTextColor: '#e0e0f0',
+      pieSectionTextColor: '#e0e0f0',
+      pieLegendTextColor: '#e0e0f0',
+      pie1: '#3b82f6',
+      pie2: '#8b5cf6',
+      pie3: '#ec4899',
+      pie4: '#ef4444',
+      pie5: '#f97316',
+      pie6: '#eab308',
+      pie7: '#22c55e',
+      pie8: '#06b6d4',
+      pie9: '#a855f7',
+      pie10: '#f43f5e',
+      pie11: '#64748b',
+      pie12: '#84cc16',
+      fontSize: '14px',
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    sequence: { actorMargin: 80, messageMargin: 40, mirrorActors: false },
+    er: { layoutDirection: 'TB' },
+    pie: { textPosition: 0.75 },
+  });
+</script>
+
+</body>
+</html>
